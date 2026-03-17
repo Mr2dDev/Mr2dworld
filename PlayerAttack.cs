@@ -4,8 +4,6 @@ public class PlayerAttack : MonoBehaviour
 {
     public int damage = 3;
     public float attackRange = 1f;
-    public LayerMask enemyLayer;
-
     public Transform attackPoint;
 
     public float attackCooldown = 0.5f;
@@ -13,10 +11,9 @@ public class PlayerAttack : MonoBehaviour
 
     void Update()
     {
-        // Check if player can attack (cooldown)
+        // Press Space to attack
         if (Time.time >= nextAttackTime)
         {
-            // Check for input
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 Attack();
@@ -27,34 +24,35 @@ public class PlayerAttack : MonoBehaviour
 
     void Attack()
     {
-        Debug.Log("ATTACK TRIGGERED");
+        Debug.Log("ATTACK");
 
-        // Detect enemies in range
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+        // Get everything in range (no layers to avoid bugs)
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
             attackPoint.position,
-            attackRange,
-            enemyLayer
+            attackRange
         );
 
-        // Damage enemies
-        foreach (Collider2D enemy in hitEnemies)
+        foreach (Collider2D hit in hits)
         {
-            Debug.Log("Hit " + enemy.name);
+            // Ignore hitting yourself
+            if (hit.gameObject == gameObject)
+                continue;
 
-            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+            Debug.Log("Hit: " + hit.name);
 
-            if (enemyHealth != null)
+            // Damage enemy if it has EnemyHealth
+            EnemyHealth enemy = hit.GetComponent<EnemyHealth>();
+
+            if (enemy != null)
             {
-                enemyHealth.TakeDamage(damage);
+                enemy.TakeDamage(damage);
             }
         }
     }
 
-    // Visualize attack range in editor
     void OnDrawGizmosSelected()
     {
-        if (attackPoint == null)
-            return;
+        if (attackPoint == null) return;
 
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
