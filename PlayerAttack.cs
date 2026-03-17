@@ -13,8 +13,10 @@ public class PlayerAttack : MonoBehaviour
 
     void Update()
     {
+        // Check if player can attack (cooldown)
         if (Time.time >= nextAttackTime)
         {
+            // Check for input
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 Attack();
@@ -25,10 +27,20 @@ public class PlayerAttack : MonoBehaviour
 
     void Attack()
     {
-        Collider2D[] enemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
+        Debug.Log("ATTACK TRIGGERED");
 
-        foreach (Collider2D enemy in enemies)
+        // Detect enemies in range
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            attackRange,
+            enemyLayer
+        );
+
+        // Damage enemies
+        foreach (Collider2D enemy in hitEnemies)
         {
+            Debug.Log("Hit " + enemy.name);
+
             EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
 
             if (enemyHealth != null)
@@ -38,11 +50,12 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    // Visualize attack range in editor
     void OnDrawGizmosSelected()
     {
-        if (attackPoint == null) return;
+        if (attackPoint == null)
+            return;
 
-        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 }
